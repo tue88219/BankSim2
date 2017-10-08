@@ -7,10 +7,10 @@ package edu.temple.cis.c3238.banksim;
 public class Bank {
 
     public static final int NTEST = 10;
-    private final Account[] accounts;
+    protected final Account[] accounts;
     private long ntransacts = 0;
-    private final int initialBalance;
-    private final int numAccounts;
+    protected final int initialBalance;
+    protected final int numAccounts;
     private boolean open;
 
     public Bank(int numAccounts, int initialBalance) {
@@ -24,7 +24,7 @@ public class Bank {
         ntransacts = 0;
     }
 
-    public void transfer(int from, int to, int amount) {
+    public void transfer(int from, int to, int amount) throws InterruptedException {
         accounts[from].waitForAvailableFunds(amount);
         if (!open) return;
         if (accounts[from].withdraw(amount)) {
