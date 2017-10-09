@@ -5,29 +5,23 @@
  */
 package edu.temple.cis.c3238.banksim;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author bme50
  */
-public class TestingThread extends Thread{
-    
+public class TestThread extends Thread {
+
     private final Bank bank;
 
-    public TestingThread(Bank ban){
-        bank = ban;
+    public TestThread(Bank b) {
+        bank = b;
     }
-
 
     @Override
     public void run() {
         bank.test();
     }
-    
-    
-    
-    
 }
+    
+

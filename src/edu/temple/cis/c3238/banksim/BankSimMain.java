@@ -15,9 +15,11 @@ public class BankSimMain {
 
     public static void main(String[] args) throws InterruptedException {
         
+        
         Bank b = new Bank(NACCOUNTS, INITIAL_BALANCE);
         Thread[] threads = new Thread[NACCOUNTS];
-        Thread testThread = new TestingThread(b);
+        TestThread test = new TestThread(b);
+
         // Start a thread for each account
         for (int i = 0; i < NACCOUNTS; i++) {
             threads[i] = new TransferThread(b, i, INITIAL_BALANCE);
@@ -31,7 +33,7 @@ public class BankSimMain {
                 // Ignore this
             }
         }
-        testThread.start();
+        test.start();
     }
 
 }

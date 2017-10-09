@@ -1,5 +1,7 @@
 package edu.temple.cis.c3238.banksim;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @author Cay Horstmann
  * @author Modified by Paul Wolfgang
@@ -7,16 +9,18 @@ package edu.temple.cis.c3238.banksim;
 public class Bank {
 
     public static final int NTEST = 10;
-    protected final Account[] accounts;
+    private final Account[] accounts;
+    public Semaphore sem;
     private long ntransacts = 0;
-    protected final int initialBalance;
-    protected final int numAccounts;
+    private final int initialBalance;
+    private final int numAccounts;
     private boolean open;
 
     public Bank(int numAccounts, int initialBalance) {
         open = true;
         this.initialBalance = initialBalance;
         this.numAccounts = numAccounts;
+        sem = new Semaphore(10);
         accounts = new Account[numAccounts];
         for (int i = 0; i < accounts.length; i++) {
             accounts[i] = new Account(this, i, initialBalance);
@@ -25,30 +29,49 @@ public class Bank {
     }
 
     public void transfer(int from, int to, int amount) throws InterruptedException {
+
         accounts[from].waitForAvailableFunds(amount);
-        if (!open) return;
-        if (accounts[from].withdraw(amount)) {
-            accounts[to].deposit(amount);
-        }
+        sem.acquire();
+        if (!open) {sem.release();return;}
+            if (accounts[from].withdraw(amount)) {
+                accounts[to].deposit(amount);
+            }
+        sem.release();
+        System.out.println("Available permits: " + sem.availablePermits());
         if (shouldTest()) test();
+
     }
 
-    public void test() {
+    public void test(){
         int sum = 0;
-        for (Account account : accounts) {
-            System.out.printf("%s %s%n", 
-                    Thread.currentThread().toString(), account.toString());
-            sum += account.getBalance();
+        try {
+            sem.acquire(10);
+        } catch(InterruptedException ex) {
+            //
         }
-        System.out.println(Thread.currentThread().toString() + 
-                " Sum: " + sum);
+        finally {
+            for (Account account : accounts) {
+                System.out.printf("%s %s%n", Thread.currentThread().toString(), account.toString());
+                sum += account.getBalance();
+            }
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            sem.release();
+            System.out.println("Available: " + sem.availablePermits());
+        }
+
         if (sum != numAccounts * initialBalance) {
-            System.out.println(Thread.currentThread().toString() + 
-                    " Money was gained or lost");
+            System.out.println(Thread.currentThread().toString() + " Money was gained or lost");
             System.exit(1);
         } else {
-            System.out.println(Thread.currentThread().toString() + 
-                    " The bank is in balance");
+            System.out.println(Thread.currentThread().toString() + " The bank is in balance");
         }
     }
 
