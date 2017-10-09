@@ -20,7 +20,20 @@ public class TestThread extends Thread {
 
     @Override
     public void run() {
-        bank.test();
+        int sum = 0;
+        for (Account account : bank.accounts) {
+                System.out.printf("%s %s%n", Thread.currentThread().toString(), account.toString());
+                sum += account.getBalance();
+            
+            
+        }
+
+        if (sum != bank.numAccounts * bank.initialBalance) {
+            System.out.println(Thread.currentThread().toString() + " Money was gained or lost");
+            System.exit(1);
+        } else {
+            System.out.println(Thread.currentThread().toString() + " The bank is in balance");
+        }
     }
 }
     

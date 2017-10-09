@@ -9,14 +9,16 @@ import java.util.concurrent.Semaphore;
 public class Bank {
 
     public static final int NTEST = 10;
-    private final Account[] accounts;
+    protected final Account[] accounts;
     public Semaphore sem;
     private long ntransacts = 0;
-    private final int initialBalance;
-    private final int numAccounts;
+    protected final int initialBalance;
+    protected final int numAccounts;
     private boolean open;
+    TestThread test = new TestThread(this);
 
     public Bank(int numAccounts, int initialBalance) {
+
         open = true;
         this.initialBalance = initialBalance;
         this.numAccounts = numAccounts;
@@ -37,23 +39,18 @@ public class Bank {
                 accounts[to].deposit(amount);
             }
         sem.release();
-        System.out.println("Available permits: " + sem.availablePermits());
+        //System.out.println("Available permits: " + sem.availablePermits());
         if (shouldTest()) test();
 
     }
 
-    public void test(){
-        int sum = 0;
+    public void test() throws InterruptedException{
+
         try {
             sem.acquire(10);
-        } catch(InterruptedException ex) {
-            //
-        }
-        finally {
-            for (Account account : accounts) {
-                System.out.printf("%s %s%n", Thread.currentThread().toString(), account.toString());
-                sum += account.getBalance();
-            }
+        
+        }finally {
+            test.run();
             sem.release();
             sem.release();
             sem.release();
@@ -64,14 +61,7 @@ public class Bank {
             sem.release();
             sem.release();
             sem.release();
-            System.out.println("Available: " + sem.availablePermits());
-        }
-
-        if (sum != numAccounts * initialBalance) {
-            System.out.println(Thread.currentThread().toString() + " Money was gained or lost");
-            System.exit(1);
-        } else {
-            System.out.println(Thread.currentThread().toString() + " The bank is in balance");
+           // System.out.println("Available: " + sem.availablePermits());
         }
     }
 
