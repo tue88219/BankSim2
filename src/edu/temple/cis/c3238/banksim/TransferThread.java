@@ -33,6 +33,7 @@ class TransferThread extends Thread {
            
             
         }
+        System.out.println("Bank is closed.");
         bank.closeBank();
     }
 }

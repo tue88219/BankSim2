@@ -31,36 +31,32 @@ public class Bank {
     }
 
     public void transfer(int from, int to, int amount) throws InterruptedException {
-
+        
+        //while(sem.availablePermits()==0);
         accounts[from].waitForAvailableFunds(amount);
+        
         sem.acquire();
-        if (!open) {sem.release();return;}
-            if (accounts[from].withdraw(amount)) {
-                accounts[to].deposit(amount);
-            }
+        if (!open) {return;}
+        if (accounts[from].withdraw(amount)) {
+            accounts[to].deposit(amount);
+        }
         sem.release();
         //System.out.println("Available permits: " + sem.availablePermits());
-        if (shouldTest()) test();
+        if (shouldTest()) tester();
 
     }
+    
+    
 
-    public void test() throws InterruptedException{
+    public void tester() throws InterruptedException{
 
         try {
             sem.acquire(10);
         
         }finally {
-            test.run();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
-            sem.release();
+           test.run();
+           sem.release(10);
+
            // System.out.println("Available: " + sem.availablePermits());
         }
     }
@@ -80,6 +76,7 @@ public class Bank {
                 account.notifyAll();
             }
         }
+        System.exit(0);
     }
     
     public synchronized boolean shouldTest() {
